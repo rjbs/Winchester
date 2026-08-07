@@ -8,8 +8,15 @@ A new game sits face down until you press Start, because the opponent's clock
 starts when you do and not when the page finished loading.
 
 The board marks the skunk line at 91 and the double skunk line at 61, thirty and
-sixty short of the end.  Nothing in the game reacts to them; they're there so you
-can see where you stand, which is all a wooden board does for you either.
+sixty short of the end, with one skunk and two.  Nothing in the game reacts to
+those lines; they're there so you can see where you stand, which is all a wooden
+board does for you either.
+
+The skunk is `skunk.svg`, from
+[freesvg.org](https://freesvg.org/skunk-silhouette-vector-drawing), published
+2015-12-02 and in the public domain via OpenClipart.  It's a single filled path,
+which `skunk.mjs` carries on its own so it can be scaled and coloured like
+anything else drawn on the board.
 
 You peg twelve for every hand you score correctly, and a wrong answer hands the
 opponent two.  Meanwhile they peg twelve every ten seconds, whether or not you're

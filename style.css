@@ -207,12 +207,7 @@ dialog .buttons {
   stroke-dasharray: 1.1 1;
 }
 
-.skunk-label {
-  font-size: 2.4px;
-  fill: #6d6252;
-  text-anchor: middle;
-  letter-spacing: 0.3px;
-}
+.skunk-mark { fill: #6d6252 }
 
 /* ---- cards -------------------------------------------------------------- */
 

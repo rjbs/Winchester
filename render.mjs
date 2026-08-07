@@ -3,6 +3,8 @@
 // hands back a closure for moving the pegs, because rebuilding them on every
 // tick would be silly.
 
+import { SKUNK_ORIGIN, SKUNK_PATH, SKUNK_SIZE } from './skunk.mjs';
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const X0         = 3;    // the start hole, "hole zero", where a peg sits at nil
@@ -16,11 +18,15 @@ const TRACK_Y  = { opponent: 9, player: 22 };
 // positions a real board bothers to mark, so they're the ticks too, in place of
 // a plain every-thirty ruler. -- claude, 2026-08-07
 const SKUNKS = [
-  { at: 61, label: 'DOUBLE SKUNK' },
-  { at: 91, label: 'SKUNK' },
+  { at: 61, count: 2 },
+  { at: 91, count: 1 },
 ];
 
 const TICKS = [ 0, 61, 91, 121 ];
+
+const SKUNK_HEIGHT = 4.8;  // board units
+const SKUNK_GAP    = 0.5;  // between the two of them at the double line
+const SKUNK_TOP    = 0.4;
 
 // A peg walks to its new hole rather than teleporting.  Twelve points at once
 // is a big enough jump to read as a windfall; crawling it makes it read as
@@ -67,11 +73,22 @@ export function buildBoard (svg) {
       x2: x, y2: TRACK_Y.player + 3.4,
     }));
 
-    const label = svgEl('text', {
-      class: 'skunk-label', x, y: TRACK_Y.opponent - 4.4,
-    });
-    label.textContent = skunk.label;
-    svg.append(label);
+    // One skunk for the skunk line, two for the double, centred on the line.
+    const scale = SKUNK_HEIGHT / SKUNK_SIZE.height;
+    const width = SKUNK_SIZE.width * scale;
+    const span  = skunk.count * width + (skunk.count - 1) * SKUNK_GAP;
+
+    for (let n = 0; n < skunk.count; n++) {
+      const left = x - span / 2 + n * (width + SKUNK_GAP);
+
+      const mark = svgEl('g', {
+        class: 'skunk-mark',
+        transform: `translate(${left} ${SKUNK_TOP}) scale(${scale}) ${SKUNK_ORIGIN}`,
+      });
+
+      mark.append(svgEl('path', { d: SKUNK_PATH }));
+      svg.append(mark);
+    }
   }
 
   for (const who of [ 'opponent', 'player' ]) {
