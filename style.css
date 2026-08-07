@@ -268,8 +268,11 @@ button:active { background: #2b2419 }
 #review { margin-top: 1.5rem }
 #review #tally { color: var(--dim); margin: 0 0 1rem }
 
+/* Narrow, because a row reading "#1 ✗ said 3, was 5" followed by a metre of
+   nothing is hard to scan and leaves the chevron orphaned. -- claude, 2026-08-07 */
 .log {
   list-style: none;
+  width: min(34rem, 100%);
   margin: 1.5rem 0 0;
   padding: 0;
 }
@@ -279,7 +282,7 @@ button:active { background: #2b2419 }
 
 .log summary {
   display: grid;
-  grid-template-columns: 2.75rem 1.25rem 1fr 1rem;
+  grid-template-columns: 2.75rem 1.25rem 1fr 1.25rem;
   align-items: center;
   gap: 0.5rem;
   padding: 0.55rem 0.25rem;
@@ -289,22 +292,26 @@ button:active { background: #2b2419 }
 
 .log summary::-webkit-details-marker { display: none }
 .log summary:hover { background: var(--panel) }
-.log summary:hover::after { color: var(--ink) }
 
-/* The only thing telling you a row opens, so it's always there rather than
-   waiting on a hover nobody gets on a phone. -- claude, 2026-08-07 */
+/* Drawn from two borders rather than set as a character: ▸ is U+25B8, whose name
+   really is BLACK RIGHT-POINTING SMALL TRIANGLE, and it looked it.  This way the
+   size is ours to pick and no font gets a vote.  Always shown, never hover-only,
+   because a phone has no hover to give. -- claude, 2026-08-07 */
 .log summary::after {
-  content: '▸';
+  content: '';
+  width: 0.5rem;
+  height: 0.5rem;
   justify-self: end;
-  color: var(--dim);
-  font-size: 0.9rem;
-  line-height: 1;
+  border-right: 2px solid var(--dim);
+  border-bottom: 2px solid var(--dim);
+  transform: rotate(-45deg);
 }
 
-.log details[open] summary::after { transform: rotate(90deg) }
+.log summary:hover::after       { border-color: var(--ink) }
+.log details[open] summary::after { transform: rotate(45deg) }
 
 @media (prefers-reduced-motion: no-preference) {
-  .log summary::after { transition: transform 0.15s ease, color 0.15s ease }
+  .log summary::after { transition: transform 0.15s ease, border-color 0.15s ease }
 }
 
 .hand-no { color: var(--dim); font-variant-numeric: tabular-nums }
