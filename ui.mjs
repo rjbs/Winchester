@@ -51,11 +51,35 @@ function showHand () {
   $('hand-area').replaceChildren(handEl(game.hand));
 }
 
-function rejectGuess () {
+function shakeBox () {
   const input = $('guess');
   input.classList.remove('bad');
   void input.offsetWidth; // restart the animation even on a repeat offence
   input.classList.add('bad');
+}
+
+// A star for a hit, a cross for a miss, stamped over the table and gone in half
+// a second.  A miss must not give the answer away, so it says nothing.
+function stamp (kind, gained) {
+  const node = $('flash');
+
+  node.className = '';
+  node.replaceChildren();
+  void node.offsetWidth;
+
+  const glyph = document.createElement('span');
+  glyph.className = 'glyph';
+  glyph.textContent = kind === 'hit' ? '★' : '✗';
+  node.append(glyph);
+
+  if (kind === 'hit') {
+    const gain = document.createElement('span');
+    gain.className = 'gain';
+    gain.textContent = `+${gained}`;
+    node.append(gain);
+  }
+
+  node.className = kind;
 }
 
 function finish () {
@@ -83,9 +107,10 @@ function start () {
 
   game = new Game({ winning, opponent, pegs });
 
-  $('review').hidden = true;
-  $('play').hidden   = false;
-  $('guess').value   = '';
+  $('review').hidden  = true;
+  $('play').hidden    = false;
+  $('guess').value    = '';
+  $('flash').className = '';
 
   showHand();
   paint();
@@ -104,11 +129,18 @@ $('guess-form').addEventListener('submit', (event) => {
   const entry = game.guess($('guess').value);
 
   if (entry === undefined) {
-    rejectGuess();
+    shakeBox();
     return;
   }
 
   $('guess').value = '';
+
+  if (entry.correct) {
+    stamp('hit', entry.pegged);
+  } else {
+    stamp('miss');
+    shakeBox();
+  }
 
   if (game.isOver) {
     finish();

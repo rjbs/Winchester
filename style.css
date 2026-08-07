@@ -106,6 +106,50 @@ button:active { background: #2b2419 }
 
 /* ---- cards -------------------------------------------------------------- */
 
+/* ---- the hit/miss stamp ------------------------------------------------- */
+
+#play { position: relative }
+
+#flash {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1em;
+  opacity: 0;
+  pointer-events: none;
+  font-family: var(--serif);
+  font-weight: 700;
+  text-shadow: 0 0 1.5rem var(--bg), 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+#flash .glyph { font-size: clamp(4rem, 26vw, 8rem); line-height: 1 }
+#flash .gain  { font-size: clamp(1.25rem, 7vw, 2.25rem); line-height: 1 }
+
+#flash.hit  { color: var(--right); animation: stamp 0.65s ease-out both }
+#flash.miss { color: var(--opp);   animation: stamp 0.45s ease-out both }
+
+@keyframes stamp {
+  0%   { opacity: 0;    transform: scale(0.45) }
+  22%  { opacity: 1;    transform: scale(1.1) }
+  55%  { opacity: 0.95; transform: scale(1) }
+  100% { opacity: 0;    transform: scale(1.2) }
+}
+
+/* Still say hit or miss without any of the lunging about. */
+@keyframes hold {
+  0%, 70% { opacity: 1 }
+  100%    { opacity: 0 }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #flash.hit, #flash.miss { animation-name: hold }
+  #guess.bad { animation: none }
+}
+
 .hand {
   display: flex;
   align-items: flex-start;
