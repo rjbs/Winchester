@@ -279,7 +279,7 @@ button:active { background: #2b2419 }
 
 .log summary {
   display: grid;
-  grid-template-columns: 2.75rem 1.25rem 1fr;
+  grid-template-columns: 2.75rem 1.25rem 1fr 1rem;
   align-items: center;
   gap: 0.5rem;
   padding: 0.55rem 0.25rem;
@@ -289,6 +289,23 @@ button:active { background: #2b2419 }
 
 .log summary::-webkit-details-marker { display: none }
 .log summary:hover { background: var(--panel) }
+.log summary:hover::after { color: var(--ink) }
+
+/* The only thing telling you a row opens, so it's always there rather than
+   waiting on a hover nobody gets on a phone. -- claude, 2026-08-07 */
+.log summary::after {
+  content: '▸';
+  justify-self: end;
+  color: var(--dim);
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.log details[open] summary::after { transform: rotate(90deg) }
+
+@media (prefers-reduced-motion: no-preference) {
+  .log summary::after { transition: transform 0.15s ease, color 0.15s ease }
+}
 
 .hand-no { color: var(--dim); font-variant-numeric: tabular-nums }
 .mark { font-weight: 700 }
