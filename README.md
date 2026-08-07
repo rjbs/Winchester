@@ -27,13 +27,21 @@ Anywhere that serves static files will do, which is how you get it onto a phone.
 
 ## Knobs
 
-Three query parameters, for tuning without editing anything:
+The gear in the top corner opens three sliders.  Apply starts a fresh game;
+Cancel and Escape leave the one in progress alone, and the opponent doesn't peg
+while the dialog is open.
+
+Those settings are the query string, not stored state:
 
 | parameter | effect                                                     |
 |-----------|------------------------------------------------------------|
 | `?to=48`  | play to 48 instead of 121, to reach the review quickly      |
 | `?pace=6` | opponent takes 6 seconds a turn instead of 10               |
 | `?pegs=8` | a correct answer is worth 8, and the opponent's turn is too  |
+
+Applying rewrites the URL, so a tuned game survives a reload and a setup you
+like can be bookmarked.  Only the values that differ from the defaults show up
+there, and typing one by hand works exactly as well as the sliders.
 
 `?pegs=` moves both sides, so the two always need the same number of turns and
 changing one number doesn't quietly rig the game.
@@ -55,7 +63,6 @@ condition are tested in node rather than by staring at a browser.
 
 ## Still to come
 
-* a way to change the opponent's speed without editing the URL
 * every third hand is the crib, where a four-card flush doesn't count
 * maybe pegging the hand's own value instead of a flat twelve
 * naming the hands instead of totalling them

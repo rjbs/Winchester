@@ -10,6 +10,24 @@
 <body>
 
 <main>
+  <header>
+    <button type="button" id="gear" aria-label="Settings" title="Settings">
+      <svg viewBox="-12 -12 24 24" aria-hidden="true">
+        <g class="teeth">
+          <rect x="-1.6" y="-9.8" width="3.2" height="4.8" rx="1"/>
+          <rect x="-1.6" y="-9.8" width="3.2" height="4.8" rx="1" transform="rotate(45)"/>
+          <rect x="-1.6" y="-9.8" width="3.2" height="4.8" rx="1" transform="rotate(90)"/>
+          <rect x="-1.6" y="-9.8" width="3.2" height="4.8" rx="1" transform="rotate(135)"/>
+          <rect x="-1.6" y="-9.8" width="3.2" height="4.8" rx="1" transform="rotate(180)"/>
+          <rect x="-1.6" y="-9.8" width="3.2" height="4.8" rx="1" transform="rotate(225)"/>
+          <rect x="-1.6" y="-9.8" width="3.2" height="4.8" rx="1" transform="rotate(270)"/>
+          <rect x="-1.6" y="-9.8" width="3.2" height="4.8" rx="1" transform="rotate(315)"/>
+        </g>
+        <circle class="body" r="6"/>
+      </svg>
+    </button>
+  </header>
+
   <section class="board">
     <svg id="board" aria-label="cribbage board"></svg>
   </section>
@@ -36,6 +54,37 @@
     <div id="log-area"></div>
   </section>
 </main>
+
+<dialog id="settings">
+  <form method="dialog" id="settings-form">
+    <h2>Settings</h2>
+
+    <div class="setting">
+      <label for="set-pegs">Points for a right answer</label>
+      <input type="range" id="set-pegs" min="2" max="30" step="2">
+      <output id="out-pegs"></output>
+    </div>
+
+    <div class="setting">
+      <label for="set-pace">Opponent's seconds per turn</label>
+      <input type="range" id="set-pace" min="2" max="30" step="1">
+      <output id="out-pace"></output>
+    </div>
+
+    <div class="setting">
+      <label for="set-to">Play to</label>
+      <input type="range" id="set-to" min="31" max="121" step="30">
+      <output id="out-to"></output>
+    </div>
+
+    <p id="set-note"></p>
+
+    <div class="buttons">
+      <button type="button" id="set-cancel">Cancel</button>
+      <button type="submit" id="set-apply" value="apply">Apply</button>
+    </div>
+  </form>
+</dialog>
 
 <script type="module" src="ui.mjs"></script>
 

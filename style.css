@@ -60,6 +60,93 @@ button {
 button:hover { border-color: var(--dim) }
 button:active { background: #2b2419 }
 
+/* ---- the gear and its dialog -------------------------------------------- */
+
+header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.4rem;
+}
+
+#gear {
+  display: grid;
+  place-items: center;
+  padding: 0.35rem;
+  color: var(--dim);
+  background: none;
+  border-color: transparent;
+}
+
+#gear:hover { color: var(--ink); border-color: var(--rule) }
+
+/* Drawn rather than set as ⚙, for the same reason as the review chevron: the
+   size is ours and no font gets a vote. -- claude, 2026-08-07 */
+#gear svg { display: block; width: 1.4rem; height: 1.4rem }
+#gear .teeth { fill: currentColor }
+#gear .body { fill: none; stroke: currentColor; stroke-width: 2.6 }
+
+dialog {
+  width: min(24rem, calc(100vw - 2rem));
+  padding: 1.25rem;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 0.6rem;
+  font-family: var(--ui);
+}
+
+dialog::backdrop { background: rgba(0, 0, 0, 0.65) }
+
+dialog h2 {
+  margin: 0 0 1.25rem;
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.setting {
+  display: grid;
+  grid-template-columns: 1fr 2.5rem;
+  align-items: center;
+  gap: 0.15rem 0.75rem;
+  margin-bottom: 1.1rem;
+}
+
+.setting label {
+  grid-column: 1 / -1;
+  font-size: 0.85rem;
+  color: var(--dim);
+}
+
+.setting input[type="range"] {
+  width: 100%;
+  height: 1.6rem; /* a target you can actually hit with a thumb */
+  margin: 0;
+  accent-color: var(--you);
+}
+
+.setting output {
+  text-align: right;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+#set-note {
+  margin: 0 0 1.25rem;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--dim);
+}
+
+dialog .buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+#set-apply { border-color: var(--you); color: var(--you) }
+#set-apply:hover { background: #1b2733 }
+
 /* ---- the board ---------------------------------------------------------- */
 
 .board {

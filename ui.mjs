@@ -1,7 +1,7 @@
 // Wiring: events in, DOM out.  The rules live in cribbage.mjs, the state in
 // game.mjs, and the drawing in render.mjs.
 
-import { Game, OPPONENT } from './game.mjs';
+import { Game, OPPONENT, WINNING } from './game.mjs';
 import { buildBoard, handEl, reviewEl } from './render.mjs';
 
 const $ = (id) => document.getElementById(id);
@@ -11,28 +11,43 @@ const MAX_HAND = 121; // a peg never shows more than the winning post
 
 const board = buildBoard($('board'));
 
-// Knobs on the query string, for tuning without editing anything: `?to=48`
-// shortens the game, `?pace=4` sets the opponent's seconds-per-turn, and
-// `?pegs=8` changes what a correct answer is worth.
-const params  = new URLSearchParams(location.search);
-const winning = Number(params.get('to'))   || undefined;
-const pegs    = Number(params.get('pegs')) || undefined;
-const paceSec = Number(params.get('pace'));
+// The tuneables live in the query string, so the settings dialog and a
+// hand-typed ?pace=6 are the same mechanism: a tuned game survives a reload and
+// can be bookmarked, and there's no storage layer to go stale. -- claude, 2026-08-07
+const DEFAULTS = {
+  pegs: OPPONENT.points,
+  pace: OPPONENT.everyMs / 1000,
+  to:   WINNING,
+};
 
-// ?pegs= moves the opponent too, so the two sides always need the same number of
-// turns and changing one number doesn't quietly rig the game.
-const opponent = (pegs !== undefined || paceSec > 0)
-               ? {
-                   points:  pegs ?? OPPONENT.points,
-                   everyMs: paceSec > 0 ? paceSec * 1000 : OPPONENT.everyMs,
-                 }
-               : undefined;
+function readSettings () {
+  const params = new URLSearchParams(location.search);
+
+  const positive = (key) => {
+    const value = Number(params.get(key));
+    return Number.isFinite(value) && value > 0 ? value : DEFAULTS[key];
+  };
+
+  return { pegs: positive('pegs'), pace: positive('pace'), to: positive('to') };
+}
+
+// Only what differs from the defaults, so an ordinary game keeps a clean URL.
+function writeSettings (next) {
+  const params = new URLSearchParams();
+  for (const [ key, value ] of Object.entries(next)) {
+    if (value !== DEFAULTS[key]) params.set(key, String(value));
+  }
+
+  const query = params.toString();
+  history.replaceState(null, '', query ? `?${query}` : location.pathname);
+}
 
 // A readonly input still displays its value and still takes focus, but iOS
 // won't raise the system keyboard over the cards for it.  So on touch devices we
 // drive the field from our own keypad instead.
 const isTouch = window.matchMedia('(hover: none)').matches;
 
+let settings = readSettings();
 let game;
 let timer;
 
@@ -118,10 +133,24 @@ function review () {
   $('again').focus();
 }
 
+function runClock () {
+  clearInterval(timer);
+
+  timer = setInterval(() => {
+    game.tick();
+    if (game.isOver) finish();
+    else paint();
+  }, TICK_MS);
+}
+
 function start () {
   clearInterval(timer);
 
-  game = new Game({ winning, opponent, pegs });
+  game = new Game({
+    winning:  settings.to,
+    pegs:     settings.pegs,
+    opponent: { points: settings.pegs, everyMs: settings.pace * 1000 },
+  });
 
   $('review').hidden  = true;
   $('play').hidden    = false;
@@ -133,11 +162,7 @@ function start () {
   board.snap(); // straight back to nil, rather than retreating a hole at a time
   if (! isTouch) $('guess').focus();
 
-  timer = setInterval(() => {
-    game.tick();
-    if (game.isOver) finish();
-    else paint();
-  }, TICK_MS);
+  runClock();
 }
 
 $('guess-form').addEventListener('submit', (event) => {
@@ -177,6 +202,65 @@ $('guess').addEventListener('input', (event) => {
 });
 
 $('again').addEventListener('click', start);
+
+// ---- settings -------------------------------------------------------------
+
+const SLIDERS = { pegs: 'set-pegs', pace: 'set-pace', to: 'set-to' };
+
+function mmss (seconds) {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+}
+
+function draftSettings () {
+  const draft = {};
+  for (const [ key, id ] of Object.entries(SLIDERS)) draft[key] = Number($(id).value);
+  return draft;
+}
+
+// Say what the numbers mean, since "12" and "10 seconds" don't obviously add up
+// to a game length until you've done the division.
+function describeDraft () {
+  const draft = draftSettings();
+
+  for (const key of Object.keys(SLIDERS)) $(`out-${key}`).textContent = draft[key];
+
+  const turns = Math.ceil(draft.to / draft.pegs);
+  $('set-note').textContent = `${turns} right answers to win.`
+    + `  The opponent gets there in ${mmss(turns * draft.pace)}.`;
+}
+
+$('gear').addEventListener('click', () => {
+  // The opponent doesn't peg while you're fiddling with the dials.  Leave the
+  // clock alone once the game is over, or the winning peg stops mid-walk and the
+  // review never arrives.
+  if (! game.isOver) clearInterval(timer);
+
+  for (const [ key, id ] of Object.entries(SLIDERS)) $(id).value = String(settings[key]);
+
+  describeDraft();
+  $('settings').showModal();
+});
+
+for (const id of Object.values(SLIDERS)) {
+  $(id).addEventListener('input', describeDraft);
+}
+
+$('set-cancel').addEventListener('click', () => $('settings').close('cancel'));
+
+// Escape closes with an empty returnValue, so anything but Apply is a cancel.
+$('settings').addEventListener('close', () => {
+  if ($('settings').returnValue === 'apply') {
+    settings = draftSettings();
+    writeSettings(settings);
+    start();
+    return;
+  }
+
+  if (! game.isOver) {
+    game.resume(); // no credit for the time the dialog was open
+    runClock();
+  }
+});
 
 document.addEventListener('visibilitychange', () => {
   if (! document.hidden) game?.resume();
