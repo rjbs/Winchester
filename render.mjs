@@ -24,6 +24,10 @@ const SKUNKS = [
 
 const TICKS = [ 0, 61, 91, 121 ];
 
+// The tallies are right-justified against this, so a lone 0 sits where the 0 of
+// 110 sits.  Left-justified, a one-digit score left the board looking lopsided.
+const TALLY_RIGHT = 152;
+
 const SKUNK_HEIGHT = 4.8;  // board units
 const SKUNK_GAP    = 0.5;  // between the two of them at the double line
 const SKUNK_TOP    = 0.4;
@@ -55,6 +59,14 @@ function holeX (hole) {
   return X0 + hole + Math.floor((hole - 1) / 5) * STREET_GAP;
 }
 
+// Midway between a hole and the one before it, which is where a boundary line
+// belongs: the skunk line marks "you have to reach 61", not hole 61 itself, so
+// drawing it through that hole is wrong.  At 61 and 91 the midpoint lands in a
+// street gap, which is where a wooden board puts it too. -- claude, 2026-08-07
+function beforeHole (hole) {
+  return (holeX(hole - 1) + holeX(hole)) / 2;
+}
+
 // Draw both tracks into an <svg> and return { setScores }.
 export function buildBoard (svg) {
   svg.setAttribute('viewBox', `0 0 ${holeX(HOLES) + 18} 31`);
@@ -65,7 +77,7 @@ export function buildBoard (svg) {
 
   // Drawn first, so the holes and pegs sit over them rather than under.
   for (const skunk of SKUNKS) {
-    const x = holeX(skunk.at);
+    const x = beforeHole(skunk.at);
 
     svg.append(svgEl('line', {
       class: 'skunk-line',
@@ -112,7 +124,7 @@ export function buildBoard (svg) {
     track.append(label);
 
     const peg = svgEl('circle', { class: 'peg', cx: holeX(0), cy: y, r: 1.7 });
-    const num = svgEl('text', { class: 'tally', x: holeX(HOLES) + 4, y: y + 2.4 });
+    const num = svgEl('text', { class: 'tally', x: TALLY_RIGHT, y: y + 2.4 });
     num.textContent = '0';
 
     track.append(peg, num);
@@ -121,9 +133,15 @@ export function buildBoard (svg) {
     pegs[who] = { peg, num };
   }
 
+  // A skunk tick names the line above it, so it sits with the line; 0 and 121 are
+  // the ends of the track and sit on their holes.
+  const skunkAt = new Set(SKUNKS.map(skunk => skunk.at));
+
   for (const tick of TICKS) {
     const label = svgEl('text', {
-      class: 'tick', x: holeX(tick), y: TRACK_Y.player + 6,
+      class: 'tick',
+      x: skunkAt.has(tick) ? beforeHole(tick) : holeX(tick),
+      y: TRACK_Y.player + 6,
     });
     label.textContent = String(tick);
     svg.append(label);

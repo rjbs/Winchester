@@ -193,6 +193,7 @@ dialog .buttons {
   font-size: 6.2px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  text-anchor: end;
 }
 
 .tick {
