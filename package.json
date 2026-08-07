@@ -1,0 +1,11 @@
+{
+  "name": "winchester",
+  "version": "0.1.0",
+  "description": "a cribbage hand-scoring trainer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"test/*.test.mjs\"",
+    "serve": "python3 -m http.server 8000"
+  }
+}
