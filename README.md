@@ -7,6 +7,10 @@ cards, over and over, and all you have to do is say what the hand is worth.
 A new game sits face down until you press Start, because the opponent's clock
 starts when you do and not when the page finished loading.
 
+The board marks the skunk line at 91 and the double skunk line at 61, thirty and
+sixty short of the end.  Nothing in the game reacts to them; they're there so you
+can see where you stand, which is all a wooden board does for you either.
+
 You peg twelve for every hand you score correctly, and a wrong answer hands the
 opponent two.  Meanwhile they peg twelve every ten seconds, whether or not you're
 ready.  First to 121 wins, and then you get a hand-by-hand listing of everything

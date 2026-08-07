@@ -10,7 +10,17 @@ const STREET_GAP = 0.5;  // extra space after every fifth hole
 const HOLES      = 121;
 
 const TRACK_Y  = { opponent: 9, player: 22 };
-const TICKS    = [ 0, 30, 60, 90, 121 ];
+
+// Thirty and sixty short of the end: reach 121 while your opponent is short of
+// 91 and they're skunked, short of 61 and it's a double skunk.  These are the
+// positions a real board bothers to mark, so they're the ticks too, in place of
+// a plain every-thirty ruler. -- claude, 2026-08-07
+const SKUNKS = [
+  { at: 61, label: 'DOUBLE SKUNK' },
+  { at: 91, label: 'SKUNK' },
+];
+
+const TICKS = [ 0, 61, 91, 121 ];
 
 // A peg walks to its new hole rather than teleporting.  Twelve points at once
 // is a big enough jump to read as a windfall; crawling it makes it read as
@@ -46,6 +56,23 @@ export function buildBoard (svg) {
   svg.replaceChildren();
 
   const pegs = {};
+
+  // Drawn first, so the holes and pegs sit over them rather than under.
+  for (const skunk of SKUNKS) {
+    const x = holeX(skunk.at);
+
+    svg.append(svgEl('line', {
+      class: 'skunk-line',
+      x1: x, y1: TRACK_Y.opponent - 3.4,
+      x2: x, y2: TRACK_Y.player + 3.4,
+    }));
+
+    const label = svgEl('text', {
+      class: 'skunk-label', x, y: TRACK_Y.opponent - 4.4,
+    });
+    label.textContent = skunk.label;
+    svg.append(label);
+  }
 
   for (const who of [ 'opponent', 'player' ]) {
     const y     = TRACK_Y[who];

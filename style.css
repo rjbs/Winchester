@@ -201,6 +201,19 @@ dialog .buttons {
   text-anchor: middle;
 }
 
+.skunk-line {
+  stroke: #574632;
+  stroke-width: 0.35;
+  stroke-dasharray: 1.1 1;
+}
+
+.skunk-label {
+  font-size: 2.4px;
+  fill: #6d6252;
+  text-anchor: middle;
+  letter-spacing: 0.3px;
+}
+
 /* ---- cards -------------------------------------------------------------- */
 
 /* ---- the hit/miss stamp ------------------------------------------------- */
