@@ -1,7 +1,7 @@
 // Wiring: events in, DOM out.  The rules live in cribbage.mjs, the state in
 // game.mjs, and the drawing in render.mjs.
 
-import { Game, OPPONENT, WINNING } from './game.mjs';
+import { Game, CORRECT_PEGS, OPPONENT, PENALTY, WINNING } from './game.mjs';
 import { buildBoard, faceDownHandEl, handEl, reviewEl } from './render.mjs';
 
 const $ = (id) => document.getElementById(id);
@@ -15,20 +15,30 @@ const board = buildBoard($('board'));
 // hand-typed ?pace=6 are the same mechanism: a tuned game survives a reload and
 // can be bookmarked, and there's no storage layer to go stale. -- claude, 2026-08-07
 const DEFAULTS = {
-  pegs: OPPONENT.points,
+  pegs: CORRECT_PEGS,
   pace: OPPONENT.everyMs / 1000,
   to:   WINNING,
+  miss: PENALTY,
 };
 
 function readSettings () {
   const params = new URLSearchParams(location.search);
 
-  const positive = (key) => {
+  // Absence is checked before reading, because Number(null) is 0 and `miss` is
+  // allowed to be zero -- otherwise leaving it out would read as "no penalty".
+  const read = (key, least) => {
+    if (! params.has(key)) return DEFAULTS[key];
+
     const value = Number(params.get(key));
-    return Number.isFinite(value) && value > 0 ? value : DEFAULTS[key];
+    return Number.isFinite(value) && value >= least ? value : DEFAULTS[key];
   };
 
-  return { pegs: positive('pegs'), pace: positive('pace'), to: positive('to') };
+  return {
+    pegs: read('pegs', 1),
+    pace: read('pace', 1),
+    to:   read('to',   1),
+    miss: read('miss', 0),
+  };
 }
 
 // Only what differs from the defaults, so an ordinary game keeps a clean URL.
@@ -63,8 +73,11 @@ function mmss (seconds) {
 // up to a game length until you've done the division.
 function describe (what) {
   const turns = Math.ceil(what.to / what.pegs);
-  return `${turns} right answers to win.`
+
+  const line = `${turns} right answers to win.`
     + `  The opponent gets there in ${mmss(turns * what.pace)}.`;
+
+  return what.miss ? `${line}  A wrong answer gives them ${what.miss}.` : line;
 }
 
 function paint () {
@@ -95,8 +108,9 @@ function shakeBox () {
 }
 
 // A star for a hit, a cross for a miss, stamped over the table and gone in half
-// a second.  A miss must not give the answer away, so it says nothing.
-function stamp (kind, gained) {
+// a second.  It shows what the answer cost or earned, but never what the answer
+// was: that reckoning is saved for the review.
+function stamp (kind, points) {
   const node = $('flash');
 
   node.className = '';
@@ -108,11 +122,11 @@ function stamp (kind, gained) {
   glyph.textContent = kind === 'hit' ? '★' : '✗';
   node.append(glyph);
 
-  if (kind === 'hit') {
-    const gain = document.createElement('span');
-    gain.className = 'gain';
-    gain.textContent = `+${gained}`;
-    node.append(gain);
+  if (points) {
+    const change = document.createElement('span');
+    change.className = 'gain';
+    change.textContent = kind === 'hit' ? `+${points}` : `−${points}`;
+    node.append(change);
   }
 
   node.className = kind;
@@ -174,6 +188,7 @@ function setUp () {
   game = new Game({
     winning:  settings.to,
     pegs:     settings.pegs,
+    penalty:  settings.miss,
     opponent: { points: settings.pegs, everyMs: settings.pace * 1000 },
   });
 
@@ -224,7 +239,7 @@ $('guess-form').addEventListener('submit', (event) => {
   if (entry.correct) {
     stamp('hit', entry.pegged);
   } else {
-    stamp('miss');
+    stamp('miss', entry.conceded);
     shakeBox();
   }
 
@@ -248,7 +263,12 @@ $('again').addEventListener('click', setUp);
 
 // ---- settings -------------------------------------------------------------
 
-const SLIDERS = { pegs: 'set-pegs', pace: 'set-pace', to: 'set-to' };
+const SLIDERS = {
+  pegs: 'set-pegs',
+  miss: 'set-miss',
+  pace: 'set-pace',
+  to:   'set-to',
+};
 
 function draftSettings () {
   const draft = {};

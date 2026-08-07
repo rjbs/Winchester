@@ -7,9 +7,16 @@ cards, over and over, and all you have to do is say what the hand is worth.
 A new game sits face down until you press Start, because the opponent's clock
 starts when you do and not when the page finished loading.
 
-You peg twelve for every hand you score correctly.  Meanwhile the opponent pegs
-twelve every ten seconds, whether or not you're ready.  First to 121 wins, and
-then you get a hand-by-hand listing of everything you got right and wrong.
+You peg twelve for every hand you score correctly, and a wrong answer hands the
+opponent two.  Meanwhile they peg twelve every ten seconds, whether or not you're
+ready.  First to 121 wins, and then you get a hand-by-hand listing of everything
+you got right and wrong.
+
+The penalty exists because without it a guess costs nothing but the second it
+took, so firing off numbers to see what sticks was faintly rewarded.  Two is
+enough that guessing is worse than thinking, and not enough that one slip
+decides the game.  Waiting is still worse than guessing, since the clock pays
+them twelve.
 
 Twelve is a lot for one hand, and that's deliberate: at two points a hand a game
 takes 61 correct answers, which is a spelling test rather than a game.  At twelve
@@ -37,7 +44,7 @@ Anywhere that serves static files will do, which is how you get it onto a phone.
 
 ## Knobs
 
-The gear in the top corner opens three sliders.  Apply starts a fresh game;
+The gear in the top corner opens four sliders.  Apply starts a fresh game;
 Cancel and Escape leave the one in progress alone, and the opponent doesn't peg
 while the dialog is open.
 
@@ -48,6 +55,7 @@ Those settings are the query string, not stored state:
 | `?to=48`  | play to 48 instead of 121, to reach the review quickly      |
 | `?pace=6` | opponent takes 6 seconds a turn instead of 10               |
 | `?pegs=8` | a correct answer is worth 8, and the opponent's turn is too  |
+| `?miss=0` | a wrong answer costs nothing; 0 switches the penalty off     |
 
 Applying rewrites the URL, so a tuned game survives a reload and a setup you
 like can be bookmarked.  Only the values that differ from the defaults show up

@@ -15,6 +15,10 @@ function newGame (opts = {}) {
   return { game, clock };
 }
 
+// Tests that care about exact numbers name their own pegs and pacing, so tuning
+// the defaults doesn't break them.
+const SLOW = { points: 2, everyMs: 10_000 };
+
 // Advance the clock in small steps, ticking as a browser's setInterval would,
 // so the per-tick clamp doesn't eat the time we meant to give.
 function runFor (game, clock, ms, stepMs = 200) {
@@ -82,8 +86,8 @@ test('a correct guess pegs the hand and deals again', () => {
   assert.notEqual(game.hand, first);
 });
 
-test('a wrong guess pegs nothing but still deals again', () => {
-  const { game } = newGame();
+test('a wrong guess pays the opponent and deals again', () => {
+  const { game } = newGame({ penalty: 2 });
   const first  = game.hand;
   const actual = first.score;
 
@@ -93,10 +97,41 @@ test('a wrong guess pegs nothing but still deals again', () => {
   assert.equal(entry.guessed, actual + 1);
   assert.equal(entry.actual, actual);
   assert.equal(entry.pegged, 0);
+  assert.equal(entry.conceded, 2);
   assert.equal(game.playerScore, 0);
+  assert.equal(game.opponentScore, 2, 'the opponent takes the penalty');
   assert.equal(game.handsPlayed, 1);
   assert.equal(game.handsRight, 0);
   assert.notEqual(game.hand, first);
+});
+
+test('a right guess concedes nothing', () => {
+  const { game } = newGame({ penalty: 2 });
+
+  const entry = game.guess(String(game.hand.score));
+
+  assert.equal(entry.conceded, 0);
+  assert.equal(game.opponentScore, 0);
+});
+
+test('the penalty can be switched off', () => {
+  const { game } = newGame({ penalty: 0 });
+
+  const entry = game.guess(String(game.hand.score + 1));
+
+  assert.equal(entry.conceded, 0);
+  assert.equal(game.opponentScore, 0);
+});
+
+test('enough wrong answers lose the game outright', () => {
+  const { game } = newGame({ winning: 4, penalty: 2, opponent: SLOW });
+
+  game.guess(String(game.hand.score + 1));
+  assert.equal(game.winner, undefined);
+
+  game.guess(String(game.hand.score + 1));
+  assert.equal(game.winner, 'opponent', 'no clock needed, just bad guessing');
+  assert.equal(game.opponentScore, 4);
 });
 
 test('an unparseable guess is not a turn', () => {
@@ -119,10 +154,6 @@ test('the log keeps the hand, so the review can score it again', () => {
     assert.equal(entry.hand.scoreBoard.score, entry.actual);
   }
 });
-
-// These name their own pegs and pacing, so tuning the defaults doesn't break
-// them.
-const SLOW = { points: 2, everyMs: 10_000 };
 
 test('the player wins by reaching the target', () => {
   const { game } = newGame({ winning: 4, pegs: 2 });

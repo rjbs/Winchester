@@ -12,6 +12,12 @@ export const OPPONENT     = { points: 12, everyMs: 10_000 };
 export const CORRECT_PEGS = 12;
 export const WINNING      = 121;
 
+// A wrong answer pays the opponent.  Without it, a guess costs nothing but the
+// seconds it took, so firing off numbers to see what sticks is faintly
+// rewarded.  Two is enough to make guessing worse than thinking without making
+// one slip fatal. -- claude, 2026-08-07
+export const PENALTY = 2;
+
 // The most wall time a single tick may claim.  Without this, locking your phone
 // for five minutes means the opponent has pegged out by the time you unlock, so
 // "the opponent never stops" really means "never stops while the page is
@@ -43,6 +49,7 @@ export class Game {
     opponent = OPPONENT,
     winning  = WINNING,
     pegs     = CORRECT_PEGS,
+    penalty  = PENALTY,
     deck,
   } = {}) {
     this.#now       = now;
@@ -51,6 +58,7 @@ export class Game {
     this.#deck      = (deck ?? new Deck).shuffle();
 
     this.pegs          = pegs;
+    this.penalty       = penalty;
     this.winning       = winning;
     this.playerScore   = 0;
     this.opponentScore = 0;
@@ -88,9 +96,9 @@ export class Game {
     if (total >= this.winning) this.winner = who;
   }
 
-  // Score the current hand against the player's guess, log it, and deal the
-  // next one.  Returns the log entry, or undefined if the guess wasn't a number
-  // or the game is already over.
+  // Score the current hand against the player's guess, log it, pay whoever
+  // earned it, and deal the next one.  Returns the log entry, or undefined if
+  // the guess wasn't a number or the game is already over.
   guess(text) {
     if (this.isOver) return undefined;
 
@@ -104,12 +112,15 @@ export class Game {
     const entry = {
       n: this.log.length + 1,
       hand, guessed, actual, correct,
-      pegged: correct ? this.pegs : 0,
+      pegged:   correct ? this.pegs    : 0,
+      conceded: correct ? 0            : this.penalty,
     };
 
     this.log.push(entry);
 
-    if (correct) this.#peg('player', entry.pegged);
+    if (entry.pegged)   this.#peg('player',   entry.pegged);
+    if (entry.conceded) this.#peg('opponent', entry.conceded);
+
     if (! this.isOver) this.deal();
 
     return entry;
