@@ -16,6 +16,7 @@
   --card-bg:    #f6f1e6;
   --card-black: #23201c;
   --card-red:   #ab241f;
+  --card-back:  #7c322a;
 
   --ui: system-ui, -apple-system, "Segoe UI", sans-serif;
   --serif: ui-serif, Georgia, "Times New Roman", serif;
@@ -296,6 +297,33 @@ dialog .buttons {
   line-height: 1;
   margin-top: calc(var(--w) * 0.08);
 }
+
+/* A lattice, and an inset ring standing in for the white border a real back has. */
+.card.back {
+  background:
+    repeating-linear-gradient(45deg,  transparent 0 3px, rgba(255, 255, 255, 0.1) 3px 6px),
+    repeating-linear-gradient(-45deg, transparent 0 3px, rgba(255, 255, 255, 0.1) 3px 6px),
+    var(--card-back);
+  box-shadow:
+    inset 0 0 0 calc(var(--w) * 0.055) var(--card-bg),
+    0 2px 5px rgba(0, 0, 0, 0.45);
+}
+
+/* ---- before the deal ---------------------------------------------------- */
+
+#pregame {
+  display: flex;
+  justify-content: center;
+}
+
+#start {
+  padding: 0.6rem 1.6rem;
+  font-size: 1.05rem;
+  color: var(--you);
+  border-color: var(--you);
+}
+
+#start:hover { background: #1b2733 }
 
 /* ---- guessing ----------------------------------------------------------- */
 

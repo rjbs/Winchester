@@ -36,7 +36,11 @@
     <div id="flash" aria-hidden="true"></div>
     <div id="hand-area"></div>
 
-    <form id="guess-form" autocomplete="off">
+    <div id="pregame">
+      <button type="button" id="start">Start</button>
+    </div>
+
+    <form id="guess-form" autocomplete="off" hidden>
       <input id="guess" type="text" inputmode="numeric" pattern="[0-9]*"
              maxlength="2" placeholder="?" aria-label="score for this hand">
       <button type="submit">Score it</button>

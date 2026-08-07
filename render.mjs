@@ -146,18 +146,33 @@ export function cardEl (card) {
   return node;
 }
 
+function backEl () {
+  const node = el('div', 'card back');
+  node.setAttribute('aria-hidden', 'true');
+  return node;
+}
+
 // The cut card sits off to the left, the way it sits above the deck.
-export function handEl (hand) {
+function tableEl (starter, held) {
   const node = el('div', 'hand');
 
   const cut = el('div', 'cut');
-  cut.append(cardEl(hand.starter), el('span', 'cut-label', 'cut'));
+  cut.append(starter, el('span', 'cut-label', 'cut'));
 
-  const held = el('div', 'held');
-  for (const card of hand.cards) held.append(cardEl(card));
+  const heldBox = el('div', 'held');
+  for (const card of held) heldBox.append(card);
 
-  node.append(cut, held);
+  node.append(cut, heldBox);
   return node;
+}
+
+export function handEl (hand) {
+  return tableEl(cardEl(hand.starter), hand.cards.map(cardEl));
+}
+
+// The table before the deal: the same five places, all face down.
+export function faceDownHandEl () {
+  return tableEl(backEl(), [ backEl(), backEl(), backEl(), backEl() ]);
 }
 
 function cardListEl (cards) {

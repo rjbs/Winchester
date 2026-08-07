@@ -4,6 +4,9 @@ A trainer for scoring cribbage hands.  No cribbage is actually played here:
 there's no discard, no crib, no pegging.  You are dealt a cut card and four
 cards, over and over, and all you have to do is say what the hand is worth.
 
+A new game sits face down until you press Start, because the opponent's clock
+starts when you do and not when the page finished loading.
+
 You peg twelve for every hand you score correctly.  Meanwhile the opponent pegs
 twelve every ten seconds, whether or not you're ready.  First to 121 wins, and
 then you get a hand-by-hand listing of everything you got right and wrong.
@@ -63,6 +66,7 @@ condition are tested in node rather than by staring at a browser.
 
 ## Still to come
 
+* a "how to play" popover on the pre-game screen
 * every third hand is the crib, where a four-card flush doesn't count
 * maybe pegging the hand's own value instead of a flat twelve
 * naming the hands instead of totalling them

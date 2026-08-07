@@ -2,7 +2,7 @@
 // game.mjs, and the drawing in render.mjs.
 
 import { Game, OPPONENT, WINNING } from './game.mjs';
-import { buildBoard, handEl, reviewEl } from './render.mjs';
+import { buildBoard, faceDownHandEl, handEl, reviewEl } from './render.mjs';
 
 const $ = (id) => document.getElementById(id);
 
@@ -51,11 +51,32 @@ let settings = readSettings();
 let game;
 let timer;
 
+// 'ready' is a dealt game sitting face down, waiting for you to say go.  The
+// clock belongs to 'playing' alone, so loading the page costs nothing.
+let phase = 'ready';
+
+function mmss (seconds) {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
+}
+
+// Say what the numbers mean, since 12 points and 10 seconds don't obviously add
+// up to a game length until you've done the division.
+function describe (what) {
+  const turns = Math.ceil(what.to / what.pegs);
+  return `${turns} right answers to win.`
+    + `  The opponent gets there in ${mmss(turns * what.pace)}.`;
+}
+
 function paint () {
   board.setScores(
     Math.min(game.playerScore,   MAX_HAND),
     Math.min(game.opponentScore, MAX_HAND),
   );
+
+  if (phase === 'ready') {
+    $('status').textContent = describe(settings);
+    return;
+  }
 
   $('status').textContent = game.handsPlayed === 0
     ? 'first hand'
@@ -102,6 +123,7 @@ function stamp (kind, gained) {
 // snapping there was throwing it away.
 function finish () {
   clearInterval(timer);
+  phase = 'over';
   paint();
 
   if (board.walking) {
@@ -143,8 +165,11 @@ function runClock () {
   }, TICK_MS);
 }
 
-function start () {
+// Deal a game but don't start it: cards face down, a Start button where the
+// score entry goes, and no clock running.
+function setUp () {
   clearInterval(timer);
+  phase = 'ready';
 
   game = new Game({
     winning:  settings.to,
@@ -152,23 +177,40 @@ function start () {
     opponent: { points: settings.pegs, everyMs: settings.pace * 1000 },
   });
 
-  $('review').hidden  = true;
-  $('play').hidden    = false;
-  $('guess').value    = '';
-  $('flash').className = '';
+  $('review').hidden     = true;
+  $('play').hidden       = false;
+  $('pregame').hidden    = false;
+  $('guess-form').hidden = true;
+  $('keypad').hidden     = true;
+  $('guess').value       = '';
+  $('flash').className   = '';
+
+  $('hand-area').replaceChildren(faceDownHandEl());
+  paint();
+  board.snap(); // straight back to nil, rather than retreating a hole at a time
+
+  $('start').focus();
+}
+
+function begin () {
+  phase = 'playing';
+
+  $('pregame').hidden    = true;
+  $('guess-form').hidden = false;
+  $('keypad').hidden     = ! isTouch;
 
   showHand();
   paint();
-  board.snap(); // straight back to nil, rather than retreating a hole at a time
   if (! isTouch) $('guess').focus();
 
+  game.resume(); // the clock starts now, not when the page loaded
   runClock();
 }
 
 $('guess-form').addEventListener('submit', (event) => {
   event.preventDefault();
 
-  if (game.isOver) return; // the pegs are still walking; the game isn't
+  if (phase !== 'playing') return; // not started, or the pegs are still walking
 
   const entry = game.guess($('guess').value);
 
@@ -201,15 +243,12 @@ $('guess').addEventListener('input', (event) => {
   if (clean !== input.value) input.value = clean;
 });
 
-$('again').addEventListener('click', start);
+$('start').addEventListener('click', begin);
+$('again').addEventListener('click', setUp);
 
 // ---- settings -------------------------------------------------------------
 
 const SLIDERS = { pegs: 'set-pegs', pace: 'set-pace', to: 'set-to' };
-
-function mmss (seconds) {
-  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
-}
 
 function draftSettings () {
   const draft = {};
@@ -217,23 +256,19 @@ function draftSettings () {
   return draft;
 }
 
-// Say what the numbers mean, since "12" and "10 seconds" don't obviously add up
-// to a game length until you've done the division.
 function describeDraft () {
   const draft = draftSettings();
 
   for (const key of Object.keys(SLIDERS)) $(`out-${key}`).textContent = draft[key];
 
-  const turns = Math.ceil(draft.to / draft.pegs);
-  $('set-note').textContent = `${turns} right answers to win.`
-    + `  The opponent gets there in ${mmss(turns * draft.pace)}.`;
+  $('set-note').textContent = describe(draft);
 }
 
 $('gear').addEventListener('click', () => {
-  // The opponent doesn't peg while you're fiddling with the dials.  Leave the
-  // clock alone once the game is over, or the winning peg stops mid-walk and the
-  // review never arrives.
-  if (! game.isOver) clearInterval(timer);
+  // The opponent doesn't peg while you're fiddling with the dials.  Only while
+  // playing, though: in 'over' the winning peg may still be walking, and
+  // stopping that clock means the review never arrives.
+  if (phase === 'playing') clearInterval(timer);
 
   for (const [ key, id ] of Object.entries(SLIDERS)) $(id).value = String(settings[key]);
 
@@ -252,11 +287,11 @@ $('settings').addEventListener('close', () => {
   if ($('settings').returnValue === 'apply') {
     settings = draftSettings();
     writeSettings(settings);
-    start();
+    setUp();
     return;
   }
 
-  if (! game.isOver) {
+  if (phase === 'playing') {
     game.resume(); // no credit for the time the dialog was open
     runClock();
   }
@@ -292,4 +327,4 @@ if (isTouch) {
   });
 }
 
-start();
+setUp();
