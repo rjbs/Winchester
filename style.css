@@ -24,6 +24,15 @@
 
 * { box-sizing: border-box }
 
+#boot-error {
+  margin: 0 0 1rem;
+  padding: 0.7rem 0.9rem;
+  color: var(--opp);
+  border: 1px solid var(--opp);
+  border-radius: 0.4rem;
+  font-size: 0.9rem;
+}
+
 [hidden] { display: none !important }
 
 body {

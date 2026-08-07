@@ -21,8 +21,15 @@ teleporting, so a big score reads as progress rather than as a windfall.
 It's plain static files with no build step and no dependencies, but it does use
 ES modules, so it has to be served over HTTP rather than opened from `file://`.
 
-    npm run serve         # python3 -m http.server 8000
+    npm run serve         # python3 serve.py, port 8000
     open http://localhost:8000/
+
+`serve.py` prints a LAN address alongside the localhost one, for playing on a
+phone, and sends `Cache-Control: no-store`.  That last part matters more than it
+sounds: the stock `python3 -m http.server` sends only `Last-Modified`, so a
+browser may reuse a cached module without asking.  A stale module whose exports
+have since moved fails to link, nothing runs, and you get a blank page rather
+than an error.  If it ever does happen, the boot check in `index.html` says so.
 
 Anywhere that serves static files will do, which is how you get it onto a phone.
 

@@ -328,3 +328,5 @@ if (isTouch) {
 }
 
 setUp();
+
+window.winchesterReady = true; // watched by the boot check in index.html

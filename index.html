@@ -90,6 +90,26 @@
   </form>
 </dialog>
 
+<script>
+// If ui.mjs never runs -- a stale cached module whose exports have moved, a typo,
+// a 404 -- every drawn thing is simply absent and the page looks like a design
+// decision.  Say so instead.  Deliberately not a module, so it survives whatever
+// the module graph is doing.
+function bootTrouble (detail) {
+  if (document.getElementById('boot-error')) return;
+
+  const note = document.createElement('p');
+  note.id = 'boot-error';
+  note.textContent = `Nothing loaded: ${detail}. `
+    + 'A hard reload (shift-reload) clears a stale cached module.';
+
+  document.body.prepend(note);
+}
+
+addEventListener('error', (event) => bootTrouble(event.message || 'script error'));
+setTimeout(() => { if (! window.winchesterReady) bootTrouble('ui.mjs never started') }, 2000);
+</script>
+
 <script type="module" src="ui.mjs"></script>
 
 </body>
