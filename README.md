@@ -80,4 +80,5 @@ Grading that answer means comparing a multiset of claimed combinations against
 `ScoreBoard#hits`, which is the whole reason the scorer reports hits and not
 just a number.
 
-Oh, and nineteen means nothing at all.
+Oh, and nineteen means nothing at all.  The game doesn't say so anywhere; that's
+the point of it.

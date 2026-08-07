@@ -256,14 +256,12 @@ button:active { background: #2b2419 }
   font-variant-numeric: tabular-nums;
 }
 
-#status, .hint {
+#status {
   text-align: center;
   color: var(--dim);
   margin: 1rem 0 0;
+  font-size: 0.9rem;
 }
-
-#status { font-size: 0.9rem }
-.hint   { font-size: 0.78rem; margin-top: 0.35rem }
 
 /* ---- the post-game review ---------------------------------------------- */
 
