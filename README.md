@@ -4,9 +4,14 @@ A trainer for scoring cribbage hands.  No cribbage is actually played here:
 there's no discard, no crib, no pegging.  You are dealt a cut card and four
 cards, over and over, and all you have to do is say what the hand is worth.
 
-You peg two for every hand you score correctly.  Meanwhile the opponent pegs
-two every ten seconds, whether or not you're ready.  First to 121 wins, and then
-you get a hand-by-hand listing of everything you got right and wrong.
+You peg twelve for every hand you score correctly.  Meanwhile the opponent pegs
+twelve every ten seconds, whether or not you're ready.  First to 121 wins, and
+then you get a hand-by-hand listing of everything you got right and wrong.
+
+Twelve is a lot for one hand, and that's deliberate: at two points a hand a game
+takes 61 correct answers, which is a spelling test rather than a game.  At twelve
+it's eleven deals.  The pegs walk to their new hole a hole at a time instead of
+teleporting, so a big score reads as progress rather than as a windfall.
 
 ## Running it
 
@@ -22,16 +27,16 @@ Anywhere that serves static files will do, which is how you get it onto a phone.
 
 ## Knobs
 
-Two query parameters, both mostly for development:
+Three query parameters, for tuning without editing anything:
 
-| parameter | effect                                          |
-|-----------|-------------------------------------------------|
-| `?to=8`   | play to 8 instead of 121, to reach the review    |
-| `?pace=4` | opponent pegs two every 4 seconds instead of 10  |
+| parameter | effect                                                     |
+|-----------|------------------------------------------------------------|
+| `?to=48`  | play to 48 instead of 121, to reach the review quickly      |
+| `?pace=6` | opponent takes 6 seconds a turn instead of 10               |
+| `?pegs=8` | a correct answer is worth 8, and the opponent's turn is too  |
 
-Ten seconds is the default because four isn't survivable.  At two points every
-four seconds the opponent pegs out in 242 seconds, and 61 correct hands in 242
-seconds means under four seconds a hand, including reading the cards.
+`?pegs=` moves both sides, so the two always need the same number of turns and
+changing one number doesn't quietly rig the game.
 
 ## The pieces
 
@@ -52,7 +57,7 @@ condition are tested in node rather than by staring at a browser.
 
 * a way to change the opponent's speed without editing the URL
 * every third hand is the crib, where a four-card flush doesn't count
-* maybe pegging the hand's own value instead of a flat two
+* maybe pegging the hand's own value instead of a flat twelve
 * naming the hands instead of totalling them
 
 That last one existed in the 2022 command-line version, where you could answer

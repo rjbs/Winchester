@@ -4,8 +4,12 @@
 
 import { Deck, Hand } from './cribbage.mjs';
 
-export const OPPONENT     = { points: 2, everyMs: 10_000 };
-export const CORRECT_PEGS = 2;
+// Twelve points a hand means a game is about eleven deals, which is a game of
+// cribbage rather than a spelling test.  The opponent gets the same twelve on a
+// ten-second beat, so the two sides need the same number of turns and you have
+// about ten seconds a hand. -- claude, 2026-08-07
+export const OPPONENT     = { points: 12, everyMs: 10_000 };
+export const CORRECT_PEGS = 12;
 export const WINNING      = 121;
 
 // The most wall time a single tick may claim.  Without this, locking your phone
@@ -38,6 +42,7 @@ export class Game {
     maxTickMs = MAX_TICK_MS,
     opponent = OPPONENT,
     winning  = WINNING,
+    pegs     = CORRECT_PEGS,
     deck,
   } = {}) {
     this.#now       = now;
@@ -45,6 +50,7 @@ export class Game {
     this.#opponent  = opponent;
     this.#deck      = (deck ?? new Deck).shuffle();
 
+    this.pegs          = pegs;
     this.winning       = winning;
     this.playerScore   = 0;
     this.opponentScore = 0;
@@ -95,10 +101,15 @@ export class Game {
     const actual  = hand.scoreBoard.score;
     const correct = guessed === actual;
 
-    const entry = { n: this.log.length + 1, hand, guessed, actual, correct };
+    const entry = {
+      n: this.log.length + 1,
+      hand, guessed, actual, correct,
+      pegged: correct ? this.pegs : 0,
+    };
+
     this.log.push(entry);
 
-    if (correct) this.#peg('player', CORRECT_PEGS);
+    if (correct) this.#peg('player', entry.pegged);
     if (! this.isOver) this.deal();
 
     return entry;

@@ -12,6 +12,11 @@ const HOLES      = 121;
 const TRACK_Y  = { opponent: 9, player: 22 };
 const TICKS    = [ 0, 30, 60, 90, 121 ];
 
+// A peg walks to its new hole rather than teleporting.  Twelve points at once
+// is a big enough jump to read as a windfall; crawling it makes it read as
+// progress, which is the truer feeling. -- claude, 2026-08-07
+const HOLE_MS = 300;
+
 function svgEl (name, attrs = {}) {
   const el = document.createElementNS(SVG_NS, name);
   for (const [ key, value ] of Object.entries(attrs)) {
@@ -80,13 +85,52 @@ export function buildBoard (svg) {
     svg.append(label);
   }
 
+  const shown  = { player: 0, opponent: 0 };
+  const target = { player: 0, opponent: 0 };
+  let crawl;
+
+  const WHO = [ 'player', 'opponent' ];
+
+  function place (who) {
+    const at = Math.min(shown[who], HOLES);
+    pegs[who].peg.setAttribute('cx', holeX(at));
+    pegs[who].num.textContent = String(at);
+  }
+
+  function step () {
+    let moved = false;
+
+    for (const who of WHO) {
+      if (shown[who] === target[who]) continue;
+      shown[who] += Math.sign(target[who] - shown[who]);
+      place(who);
+      moved = true;
+    }
+
+    if (! moved) {
+      clearInterval(crawl);
+      crawl = undefined;
+    }
+  }
+
   return {
+    // Where the pegs are headed.  Safe to call on every frame; the walk only
+    // starts if there's somewhere to walk to.
     setScores (player, opponent) {
-      for (const [ who, score ] of Object.entries({ player, opponent })) {
-        const shown = Math.min(score, HOLES);
-        pegs[who].peg.setAttribute('cx', holeX(shown));
-        pegs[who].num.textContent = String(shown);
-      }
+      target.player   = Math.min(player,   HOLES);
+      target.opponent = Math.min(opponent, HOLES);
+
+      const settled = WHO.every(who => shown[who] === target[who]);
+      if (! settled && crawl === undefined) crawl = setInterval(step, HOLE_MS);
+    },
+
+    // Stop walking and be where you were going.  For the end of the game, where
+    // waiting three seconds for a peg to arrive is just waiting.
+    snap () {
+      clearInterval(crawl);
+      crawl = undefined;
+
+      for (const who of WHO) { shown[who] = target[who]; place(who) }
     },
   };
 }

@@ -11,15 +11,21 @@ const MAX_HAND = 121; // a peg never shows more than the winning post
 
 const board = buildBoard($('board'));
 
-// Two knobs on the query string.  `?to=8` shortens the game, which is how you
-// look at the review screen without playing for ten minutes; `?pace=4` sets the
-// opponent's seconds-per-two-points.
+// Knobs on the query string, for tuning without editing anything: `?to=48`
+// shortens the game, `?pace=4` sets the opponent's seconds-per-turn, and
+// `?pegs=8` changes what a correct answer is worth.
 const params  = new URLSearchParams(location.search);
-const winning = Number(params.get('to')) || undefined;
+const winning = Number(params.get('to'))   || undefined;
+const pegs    = Number(params.get('pegs')) || undefined;
 const paceSec = Number(params.get('pace'));
 
-const opponent = paceSec > 0
-               ? { points: OPPONENT.points, everyMs: paceSec * 1000 }
+// ?pegs= moves the opponent too, so the two sides always need the same number of
+// turns and changing one number doesn't quietly rig the game.
+const opponent = (pegs !== undefined || paceSec > 0)
+               ? {
+                   points:  pegs ?? OPPONENT.points,
+                   everyMs: paceSec > 0 ? paceSec * 1000 : OPPONENT.everyMs,
+                 }
                : undefined;
 
 // A readonly input still displays its value and still takes focus, but iOS
@@ -55,6 +61,7 @@ function rejectGuess () {
 function finish () {
   clearInterval(timer);
   paint();
+  board.snap();
 
   $('play').hidden   = true;
   $('review').hidden = false;
@@ -74,7 +81,7 @@ function finish () {
 function start () {
   clearInterval(timer);
 
-  game = new Game({ winning, opponent });
+  game = new Game({ winning, opponent, pegs });
 
   $('review').hidden = true;
   $('play').hidden   = false;

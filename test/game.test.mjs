@@ -49,10 +49,17 @@ parses('1 2', undefined);
 
 opponent_has_after(0, 0);
 opponent_has_after(9_800, 0);
-opponent_has_after(10_000, 2);
-opponent_has_after(19_800, 2);
-opponent_has_after(20_000, 4);
-opponent_has_after(60_000, 12);
+opponent_has_after(10_000, 12);
+opponent_has_after(19_800, 12);
+opponent_has_after(20_000, 24);
+opponent_has_after(60_000, 72);
+
+// Both sides need the same number of turns, so a game is about eleven deals for
+// whoever gets there.
+test('the two sides are paced alike', () => {
+  const { game } = newGame();
+  assert.equal(Math.ceil(game.winning / game.pegs), 11);
+});
 
 test('a hand is on the table from the start', () => {
   const { game } = newGame();
@@ -61,14 +68,15 @@ test('a hand is on the table from the start', () => {
   assert.equal(game.handsPlayed, 0);
 });
 
-test('a correct guess pegs two and deals again', () => {
-  const { game } = newGame();
+test('a correct guess pegs the hand and deals again', () => {
+  const { game } = newGame({ pegs: 12 });
   const first = game.hand;
 
   const entry = game.guess(String(first.score));
 
   assert.equal(entry.correct, true);
-  assert.equal(game.playerScore, 2);
+  assert.equal(entry.pegged, 12);
+  assert.equal(game.playerScore, 12);
   assert.equal(game.handsPlayed, 1);
   assert.equal(game.handsRight, 1);
   assert.notEqual(game.hand, first);
@@ -84,6 +92,7 @@ test('a wrong guess pegs nothing but still deals again', () => {
   assert.equal(entry.correct, false);
   assert.equal(entry.guessed, actual + 1);
   assert.equal(entry.actual, actual);
+  assert.equal(entry.pegged, 0);
   assert.equal(game.playerScore, 0);
   assert.equal(game.handsPlayed, 1);
   assert.equal(game.handsRight, 0);
@@ -111,8 +120,12 @@ test('the log keeps the hand, so the review can score it again', () => {
   }
 });
 
+// These name their own pegs and pacing, so tuning the defaults doesn't break
+// them.
+const SLOW = { points: 2, everyMs: 10_000 };
+
 test('the player wins by reaching the target', () => {
-  const { game } = newGame({ winning: 4 });
+  const { game } = newGame({ winning: 4, pegs: 2 });
 
   game.guess(String(game.hand.score));
   assert.equal(game.winner, undefined);
@@ -123,7 +136,7 @@ test('the player wins by reaching the target', () => {
 });
 
 test('the opponent wins by reaching the target', () => {
-  const { game, clock } = newGame({ winning: 4 });
+  const { game, clock } = newGame({ winning: 4, opponent: SLOW });
   runFor(game, clock, 20_000);
 
   assert.equal(game.winner, 'opponent');
@@ -131,7 +144,7 @@ test('the opponent wins by reaching the target', () => {
 });
 
 test('nothing moves once someone has won', () => {
-  const { game, clock } = newGame({ winning: 2 });
+  const { game, clock } = newGame({ winning: 2, opponent: SLOW });
   runFor(game, clock, 10_000);
   assert.equal(game.winner, 'opponent');
 
@@ -143,8 +156,10 @@ test('nothing moves once someone has won', () => {
   assert.equal(game.opponentScore, 2);
 });
 
+const ENDLESS = { winning: Infinity, opponent: SLOW };
+
 test('the opponent does not bank time while the page sleeps', () => {
-  const { game, clock } = newGame();
+  const { game, clock } = newGame(ENDLESS);
 
   clock.advance(5 * 60_000);
   game.tick();
@@ -152,14 +167,14 @@ test('the opponent does not bank time while the page sleeps', () => {
   assert.equal(game.opponentScore, 0, 'one long tick only credits the clamp');
 
   // ...and the clamp is the only thing that saved us.
-  const { game: greedy, clock: greedyClock } = newGame({ maxTickMs: Infinity });
-  greedyClock.advance(5 * 60_000);
-  greedy.tick();
-  assert.equal(greedy.opponentScore, 60);
+  const greedy = newGame({ ...ENDLESS, maxTickMs: Infinity });
+  greedy.clock.advance(5 * 60_000);
+  greedy.game.tick();
+  assert.equal(greedy.game.opponentScore, 60);
 });
 
 test('resuming forgets the time nobody was watching', () => {
-  const { game, clock } = newGame({ maxTickMs: Infinity });
+  const { game, clock } = newGame({ ...ENDLESS, maxTickMs: Infinity });
 
   clock.advance(5 * 60_000);
   game.resume();
