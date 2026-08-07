@@ -1,0 +1,297 @@
+/* Dark walnut and brass, which is what a cribbage board is made of. */
+
+:root {
+  color-scheme: dark;
+
+  --bg:         #17140f;
+  --panel:      #211c15;
+  --rule:       #3d3327;
+  --ink:        #ece4d6;
+  --dim:        #9a8f7d;
+
+  --you:        #78b4e2;
+  --opp:        #d9805b;
+  --right:      #86bf74;
+
+  --card-bg:    #f6f1e6;
+  --card-black: #23201c;
+  --card-red:   #ab241f;
+
+  --ui: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --serif: ui-serif, Georgia, "Times New Roman", serif;
+}
+
+* { box-sizing: border-box }
+
+[hidden] { display: none !important }
+
+body {
+  margin: 0;
+  padding: clamp(0.75rem, 3vw, 1.5rem);
+  padding-bottom: max(clamp(0.75rem, 3vw, 1.5rem), env(safe-area-inset-bottom));
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--ui);
+  -webkit-text-size-adjust: 100%;
+}
+
+main {
+  width: min(60rem, 100%);
+  margin: 0 auto;
+}
+
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(1.4rem, 6vw, 2rem);
+  font-weight: 500;
+  margin: 0 0 0.25rem;
+}
+
+button {
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 0.4rem;
+  padding: 0.5rem 0.9rem;
+  cursor: pointer;
+}
+
+button:hover { border-color: var(--dim) }
+button:active { background: #2b2419 }
+
+/* ---- the board ---------------------------------------------------------- */
+
+.board {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.35rem 0.25rem;
+}
+
+#board {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: var(--ui);
+}
+
+.hole      { fill: #4a3d2d }
+.game-hole { fill: var(--dim) }
+.start-mark { stroke: #4a3d2d; stroke-width: 0.28 }
+
+.peg { stroke: rgba(0, 0, 0, 0.5); stroke-width: 0.35 }
+.track.player   .peg   { fill: var(--you) }
+.track.opponent .peg   { fill: var(--opp) }
+.track.player   .tally { fill: var(--you) }
+.track.opponent .tally { fill: var(--opp) }
+
+.track-label {
+  font-size: 3px;
+  fill: var(--dim);
+  letter-spacing: 0.4px;
+}
+
+.tally {
+  font-size: 6.2px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tick {
+  font-size: 2.9px;
+  fill: #6d6252;
+  text-anchor: middle;
+}
+
+/* ---- cards -------------------------------------------------------------- */
+
+.hand {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: clamp(0.75rem, 4vw, 1.75rem);
+  margin: clamp(1.25rem, 5vw, 2.5rem) 0 clamp(1rem, 4vw, 2rem);
+}
+
+.held {
+  display: flex;
+  gap: clamp(0.2rem, 1.4vw, 0.5rem);
+}
+
+.cut {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.cut-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.card {
+  --w: clamp(2.6rem, 13vw, 4.4rem);
+
+  position: relative;
+  width: var(--w);
+  aspect-ratio: 5 / 7;
+  display: grid;
+  place-items: center;
+  border-radius: calc(var(--w) * 0.1);
+  background: var(--card-bg);
+  color: var(--card-black);
+  font-family: var(--serif);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.45);
+  user-select: none;
+}
+
+.card.red { color: var(--card-red) }
+
+.card .corner {
+  position: absolute;
+  top: 3%;
+  left: 8%;
+  font-size: calc(var(--w) * 0.29);
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.card .pip {
+  font-size: calc(var(--w) * 0.46);
+  line-height: 1;
+  margin-top: calc(var(--w) * 0.08);
+}
+
+/* ---- guessing ----------------------------------------------------------- */
+
+#guess-form {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+#guess {
+  width: 4.25rem;
+  padding: 0.4rem;
+  font: 700 1.75rem/1 var(--serif);
+  text-align: center;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 0.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+#guess:focus { outline: 2px solid var(--you); outline-offset: 1px }
+
+#guess.bad {
+  border-color: var(--opp);
+  animation: shake 0.16s 2;
+}
+
+@keyframes shake {
+  25% { transform: translateX(-4px) }
+  75% { transform: translateX(4px) }
+}
+
+#keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  width: min(16rem, 100%);
+  margin: 0.9rem auto 0;
+}
+
+#keypad button {
+  padding: 0.7rem 0;
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+#status, .hint {
+  text-align: center;
+  color: var(--dim);
+  margin: 1rem 0 0;
+}
+
+#status { font-size: 0.9rem }
+.hint   { font-size: 0.78rem; margin-top: 0.35rem }
+
+/* ---- the post-game review ---------------------------------------------- */
+
+#review { margin-top: 1.5rem }
+#review #tally { color: var(--dim); margin: 0 0 1rem }
+
+.log {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+
+.log li { border-top: 1px solid var(--rule) }
+.log li:last-child { border-bottom: 1px solid var(--rule) }
+
+.log summary {
+  display: grid;
+  grid-template-columns: 2.75rem 1.25rem 1fr;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.25rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.log summary::-webkit-details-marker { display: none }
+.log summary:hover { background: var(--panel) }
+
+.hand-no { color: var(--dim); font-variant-numeric: tabular-nums }
+.mark { font-weight: 700 }
+details.right .mark { color: var(--right) }
+details.wrong .mark { color: var(--opp) }
+details.right .said { color: var(--dim) }
+
+.detail {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding-bottom: 1.25rem;
+}
+
+.detail .hand { margin-top: 0.5rem }
+
+.breakdown {
+  border-collapse: collapse;
+  width: min(24rem, 100%);
+  font-size: 0.92rem;
+}
+
+.breakdown td { padding: 0.18rem 0.4rem }
+.breakdown .cards { text-align: right; white-space: nowrap }
+.breakdown .what  { color: var(--dim) }
+
+.breakdown .pts {
+  width: 2.5rem;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.breakdown tfoot td {
+  border-top: 1px solid var(--rule);
+  padding-top: 0.35rem;
+  font-weight: 700;
+}
+
+.breakdown tfoot .what { color: var(--ink); letter-spacing: 0.08em }
+.breakdown .nothing td { color: var(--dim); font-style: italic }
+
+.mini {
+  font-family: var(--serif);
+  margin-left: 0.3rem;
+}
+
+.mini.red   { color: #e8776a }
+.mini.black { color: var(--ink) }

@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<title>Winchester — cribbage scoring practice</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<main>
+  <section class="board">
+    <svg id="board" aria-label="cribbage board"></svg>
+  </section>
+
+  <section id="play">
+    <div id="hand-area"></div>
+
+    <form id="guess-form" autocomplete="off">
+      <input id="guess" type="text" inputmode="numeric" pattern="[0-9]*"
+             maxlength="2" placeholder="?" aria-label="score for this hand">
+      <button type="submit">Score it</button>
+    </form>
+
+    <div id="keypad" hidden></div>
+
+    <p id="status"></p>
+    <p class="hint">Nineteen means nothing at all.</p>
+  </section>
+
+  <section id="review" hidden>
+    <h1 id="outcome"></h1>
+    <p id="tally"></p>
+    <button type="button" id="again">Play again</button>
+    <div id="log-area"></div>
+  </section>
+</main>
+
+<script type="module" src="ui.mjs"></script>
+
+</body>
+</html>
