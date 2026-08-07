@@ -265,14 +265,18 @@ button:active { background: #2b2419 }
 
 /* ---- the post-game review ---------------------------------------------- */
 
-#review { margin-top: 1.5rem }
+/* One centred column, rather than a narrow list hugging the left of a wide
+   window.  The text inside stays left-aligned so the hand numbers still make a
+   ladder you can run your eye down. -- claude, 2026-08-07 */
+#review {
+  width: min(34rem, 100%);
+  margin: 1.5rem auto 0;
+}
+
 #review #tally { color: var(--dim); margin: 0 0 1rem }
 
-/* Narrow, because a row reading "#1 ✗ said 3, was 5" followed by a metre of
-   nothing is hard to scan and leaves the chevron orphaned. -- claude, 2026-08-07 */
 .log {
   list-style: none;
-  width: min(34rem, 100%);
   margin: 1.5rem 0 0;
   padding: 0;
 }
