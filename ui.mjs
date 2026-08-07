@@ -82,11 +82,27 @@ function stamp (kind, gained) {
   node.className = kind;
 }
 
+// The board is done; wait for the winning peg to actually arrive before covering
+// it with the review.  Walking the last twelve holes in is the whole payoff, and
+// snapping there was throwing it away.
 function finish () {
   clearInterval(timer);
   paint();
-  board.snap();
 
+  if (board.walking) {
+    timer = setInterval(() => {
+      if (board.walking) return;
+      clearInterval(timer);
+      review();
+    }, TICK_MS);
+
+    return;
+  }
+
+  review();
+}
+
+function review () {
   $('play').hidden   = true;
   $('review').hidden = false;
 
@@ -114,6 +130,7 @@ function start () {
 
   showHand();
   paint();
+  board.snap(); // straight back to nil, rather than retreating a hole at a time
   if (! isTouch) $('guess').focus();
 
   timer = setInterval(() => {
@@ -125,6 +142,8 @@ function start () {
 
 $('guess-form').addEventListener('submit', (event) => {
   event.preventDefault();
+
+  if (game.isOver) return; // the pegs are still walking; the game isn't
 
   const entry = game.guess($('guess').value);
 

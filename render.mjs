@@ -124,8 +124,12 @@ export function buildBoard (svg) {
       if (! settled && crawl === undefined) crawl = setInterval(step, HOLE_MS);
     },
 
-    // Stop walking and be where you were going.  For the end of the game, where
-    // waiting three seconds for a peg to arrive is just waiting.
+    // Asked of the pegs, not of the timer: the interval doesn't notice it's done
+    // until the step after the last one, and that's 300ms of nothing.
+    get walking () { return WHO.some(who => shown[who] !== target[who]) },
+
+    // Stop walking and be where you were going.  For starting a new game, where
+    // the alternative is watching both pegs retreat 121 holes.
     snap () {
       clearInterval(crawl);
       crawl = undefined;
