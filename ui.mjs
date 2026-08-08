@@ -153,13 +153,33 @@ function finish () {
   review();
 }
 
+// A skunk earns a line beyond the result, in the English manner: for a beaten
+// opponent, contempt kept behind the teeth; for a drubbing of one's own, no
+// more than a tight nod that it happened.  Deep feeling, said as flatly as it
+// can be, and worse the second time either way. -- claude, 2026-08-08
+const SKUNK_LINES = {
+  player: {
+    1: 'You win.  A skunk; the opponent fell short of the line, and would sooner it went unmentioned.',
+    2: 'You win.  A double skunk.  One does try not to stare.',
+  },
+  opponent: {
+    1: 'The opponent wins.  Skunked.  A poor showing, but there it is.',
+    2: "The opponent wins.  A double skunk against you.  We shan't speak of it again.",
+  },
+};
+
+function outcomeText () {
+  const skunk = game.skunk;
+  if (skunk) return SKUNK_LINES[skunk.who][skunk.level];
+
+  return game.winner === 'player' ? 'You win.' : 'The opponent wins.';
+}
+
 function review () {
   $('play').hidden   = true;
   $('review').hidden = false;
 
-  $('outcome').textContent = game.winner === 'player'
-                           ? 'You win.'
-                           : 'The opponent wins.';
+  $('outcome').textContent = outcomeText();
 
   $('tally').textContent = `${game.handsRight} of ${game.handsPlayed} hands right`
     + ` · ${Math.min(game.playerScore, MAX_HAND)}`

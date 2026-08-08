@@ -288,6 +288,10 @@ export function reviewEl (log) {
     const details = el('details', entry.correct ? 'right' : 'wrong');
     const summary = el('summary');
 
+    // The hands you got wrong are the ones worth studying, so they start open;
+    // the right ones stay furled, a click away if you want to check the count.
+    if (! entry.correct) details.open = true;
+
     summary.append(
       el('span', 'hand-no', `#${entry.n}`),
       el('span', 'mark', entry.correct ? '✓' : '✗'),

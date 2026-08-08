@@ -32,11 +32,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Configure Pages
-        # enablement: true turns Pages on (source = GitHub Actions) the first
-        # time this runs, so there's no manual toggle in repo settings.
+        # Pages must already be enabled with "GitHub Actions" as the source
+        # (Settings -> Pages); the workflow token can't turn it on itself.
         uses: actions/configure-pages@v5
-        with:
-          enablement: true
 
       - name: Upload site
         # It's plain static files with no build step, so the repo root is the
