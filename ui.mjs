@@ -153,18 +153,20 @@ function finish () {
   review();
 }
 
-// A skunk earns a line beyond the result, in the English manner: for a beaten
-// opponent, contempt kept behind the teeth; for a drubbing of one's own, no
-// more than a tight nod that it happened.  Deep feeling, said as flatly as it
-// can be, and worse the second time either way. -- claude, 2026-08-08
+// A skunk earns a line beyond the result, always in the opponent's own voice,
+// a register of patrician hauteur.  Winning, he gloats, contempt dressed in
+// impeccable courtesy; losing, he retreats into wounded dignity that would
+// sooner deny the affair than concede it.  Worse, either way, the second time.
+// The result keys are who won; the voice is the loser's when you win, the
+// gloat's when you don't. -- claude, 2026-08-08
 const SKUNK_LINES = {
   player: {
-    1: 'You win.  A skunk; the opponent fell short of the line, and would sooner it went unmentioned.',
-    2: 'You win.  A double skunk.  One does try not to stare.',
+    1: "You win.  A momentary aberration, and manifestly beneath one's usual standard.",
+    2: 'You win.  We shall not speak of this again — and should anyone ask, I shall deny it.',
   },
   opponent: {
-    1: 'The opponent wins.  Skunked.  A poor showing, but there it is.',
-    2: "The opponent wins.  A double skunk against you.  We shan't speak of it again.",
+    1: 'The opponent wins.  Talent, one is forever relearning, is not distributed with anything like democratic fairness.',
+    2: 'The opponent wins.  A gulf so vast that even gloating would want for adequate scale.',
   },
 };
 
