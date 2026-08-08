@@ -153,21 +153,26 @@ function finish () {
   review();
 }
 
-// The win, and the skunk if there was one: skunking the opponent on a win,
-// getting skunked on a loss.  A double gets its own word, since it's twice the
-// bragging or twice the sting.
+// A skunk earns a line beyond the result, in the English manner: for a beaten
+// opponent, contempt kept behind the teeth; for a drubbing of one's own, no
+// more than a tight nod that it happened.  Deep feeling, said as flatly as it
+// can be, and worse the second time either way. -- claude, 2026-08-08
+const SKUNK_LINES = {
+  player: {
+    1: 'You win.  A skunk; the opponent fell short of the line, and would sooner it went unmentioned.',
+    2: 'You win.  A double skunk.  One does try not to stare.',
+  },
+  opponent: {
+    1: 'The opponent wins.  Skunked.  A poor showing, but there it is.',
+    2: "The opponent wins.  A double skunk against you.  We shan't speak of it again.",
+  },
+};
+
 function outcomeText () {
-  const won  = game.winner === 'player';
-  const base = won ? 'You win.' : 'The opponent wins.';
-
   const skunk = game.skunk;
-  if (! skunk) return base;
+  if (skunk) return SKUNK_LINES[skunk.who][skunk.level];
 
-  const double = skunk.level === 2;
-
-  return won
-    ? `${base}  A ${double ? 'double ' : ''}skunk!`
-    : `${base}  You're ${double ? 'double-' : ''}skunked.`;
+  return game.winner === 'player' ? 'You win.' : 'The opponent wins.';
 }
 
 function review () {
