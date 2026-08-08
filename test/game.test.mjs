@@ -246,6 +246,40 @@ test('the skunk lines follow the winning post', () => {
   assert.deepEqual(game.skunk, { level: 2, who: 'player' }, 'opponent at nil, sixty short');
 });
 
+test('no perfect game before there is a winner', () => {
+  const { game } = newGame();
+  assert.equal(game.perfect, false);
+});
+
+test('winning without a wrong answer is a perfect game', () => {
+  const { game } = newGame({ winning: 24, pegs: 12 });
+  playerWinsOut(game);
+
+  assert.equal(game.winner, 'player');
+  assert.equal(game.perfect, true);
+});
+
+test('one wrong answer spoils it, even in a win', () => {
+  // penalty 0 so the miss can't hand the game away; the win still stands, but
+  // the record no longer does.
+  const { game } = newGame({ winning: 24, pegs: 12, penalty: 0 });
+
+  game.guess(String(game.hand.score + 1)); // a miss that costs nothing
+  while (! game.isOver) game.guess(String(game.hand.score));
+
+  assert.equal(game.winner, 'player');
+  assert.ok(game.handsRight < game.handsPlayed);
+  assert.equal(game.perfect, false);
+});
+
+test('an opponent win is never perfect', () => {
+  const { game, clock } = newGame({ winning: 4, opponent: SLOW });
+  runFor(game, clock, 20_000); // the opponent pegs out while you sit at nil
+
+  assert.equal(game.winner, 'opponent');
+  assert.equal(game.perfect, false, 'no hands played, but still not yours to claim');
+});
+
 const ENDLESS = { winning: Infinity, opponent: SLOW };
 
 test('the opponent does not bank time while the page sleeps', () => {

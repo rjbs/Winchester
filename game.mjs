@@ -103,6 +103,17 @@ export class Game {
 
   get handsRight() { return this.log.filter(entry => entry.correct).length }
 
+  // A perfect game: you pegged out without ever being wrong.  Every hand you
+  // were dealt you scored, so the whole game rode on your own correct answers
+  // and the opponent never took a penalty off you.  Only ever true for a player
+  // win -- it's your accuracy being named, and the opponent's clock isn't a
+  // thing you can do perfectly. -- claude, 2026-08-08
+  get perfect() {
+    return this.winner === 'player'
+      && this.handsPlayed > 0
+      && this.handsRight === this.handsPlayed;
+  }
+
   #peg(who, points) {
     if (this.isOver) return;
 

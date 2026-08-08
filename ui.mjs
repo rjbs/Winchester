@@ -170,7 +170,17 @@ const SKUNK_LINES = {
   },
 };
 
+// A flawless win earns a line of its own, and after all the opponent's arch
+// hauteur a plainly sincere one: no scorekeeping, no persona, just the fact
+// that you scored every hand you were dealt and never gave a point away.  It
+// comes before the skunk because how cleanly you won is the better story than
+// by how wide a margin. -- claude, 2026-08-08
+const PERFECT_LINE =
+  'You win, and not one hand wrong the whole way.  A perfect game — beautifully played.';
+
 function outcomeText () {
+  if (game.perfect) return PERFECT_LINE;
+
   const skunk = game.skunk;
   if (skunk) return SKUNK_LINES[skunk.who][skunk.level];
 
