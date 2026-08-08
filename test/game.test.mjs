@@ -187,6 +187,65 @@ test('nothing moves once someone has won', () => {
   assert.equal(game.opponentScore, 2);
 });
 
+// Guess every hand right until the target is reached; the opponent's score is
+// left wherever the clock has already put it.
+function playerWinsOut (game) {
+  while (! game.isOver) game.guess(String(game.hand.score));
+}
+
+test('no skunk before there is a winner', () => {
+  const { game } = newGame();
+  assert.equal(game.skunk, undefined);
+});
+
+test('a win with the opponent at nil is a double skunk', () => {
+  const { game } = newGame({ winning: 121, pegs: 12 });
+  playerWinsOut(game);
+
+  assert.equal(game.winner, 'player');
+  assert.deepEqual(game.skunk, { level: 2, who: 'player' });
+});
+
+test('a win with the opponent between the lines is a single skunk', () => {
+  const { game, clock } = newGame({ winning: 121, pegs: 12 });
+  runFor(game, clock, 60_000); // six opponent turns of twelve: 72, past 61
+  assert.equal(game.opponentScore, 72);
+
+  playerWinsOut(game);
+
+  assert.equal(game.winner, 'player');
+  assert.deepEqual(game.skunk, { level: 1, who: 'player' });
+});
+
+test('a win with the opponent past the skunk line is no skunk', () => {
+  const { game, clock } = newGame({ winning: 121, pegs: 12 });
+  runFor(game, clock, 80_000); // eight turns: 96, past 91
+  assert.equal(game.opponentScore, 96);
+
+  playerWinsOut(game);
+
+  assert.equal(game.winner, 'player');
+  assert.equal(game.skunk, undefined);
+});
+
+test('losing badly is a skunk against you', () => {
+  const { game, clock } = newGame({ winning: 121 });
+  runFor(game, clock, 110_000); // the opponent pegs out while you sit at nil
+
+  assert.equal(game.winner, 'opponent');
+  assert.deepEqual(game.skunk, { level: 2, who: 'opponent' });
+});
+
+// The board draws its lines at 61 and 91 for a game to 121; a shortened game
+// slides them to keep the same thirty-and-sixty shape.
+test('the skunk lines follow the winning post', () => {
+  const { game } = newGame({ winning: 61, pegs: 61 });
+  playerWinsOut(game); // one right hand carries the whole game
+
+  assert.equal(game.winner, 'player');
+  assert.deepEqual(game.skunk, { level: 2, who: 'player' }, 'opponent at nil, sixty short');
+});
+
 const ENDLESS = { winning: Infinity, opponent: SLOW };
 
 test('the opponent does not bank time while the page sleeps', () => {

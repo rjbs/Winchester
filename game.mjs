@@ -82,6 +82,23 @@ export class Game {
 
   get isOver() { return this.winner !== undefined }
 
+  // The skunk lines, cribbage's own: reach the post while the loser is thirty
+  // short of it and they're skunked, sixty short and it's a double.  Measured
+  // from the winning post rather than fixed at 91 and 61, so a shortened game
+  // keeps the shape a full board draws at those two holes.  undefined until
+  // there's a winner, and for a win by an ordinary margin. -- claude, 2026-08-08
+  get skunk() {
+    if (this.winner === undefined) return undefined;
+
+    const loser = this.winner === 'player' ? this.opponentScore : this.playerScore;
+
+    const level = loser < this.winning - 60 ? 2
+                : loser < this.winning - 30 ? 1
+                : 0;
+
+    return level === 0 ? undefined : { level, who: this.winner };
+  }
+
   get handsPlayed() { return this.log.length }
 
   get handsRight() { return this.log.filter(entry => entry.correct).length }

@@ -153,13 +153,28 @@ function finish () {
   review();
 }
 
+// The win, and the skunk if there was one: skunking the opponent on a win,
+// getting skunked on a loss.  A double gets its own word, since it's twice the
+// bragging or twice the sting.
+function outcomeText () {
+  const won  = game.winner === 'player';
+  const base = won ? 'You win.' : 'The opponent wins.';
+
+  const skunk = game.skunk;
+  if (! skunk) return base;
+
+  const double = skunk.level === 2;
+
+  return won
+    ? `${base}  A ${double ? 'double ' : ''}skunk!`
+    : `${base}  You're ${double ? 'double-' : ''}skunked.`;
+}
+
 function review () {
   $('play').hidden   = true;
   $('review').hidden = false;
 
-  $('outcome').textContent = game.winner === 'player'
-                           ? 'You win.'
-                           : 'The opponent wins.';
+  $('outcome').textContent = outcomeText();
 
   $('tally').textContent = `${game.handsRight} of ${game.handsPlayed} hands right`
     + ` · ${Math.min(game.playerScore, MAX_HAND)}`
