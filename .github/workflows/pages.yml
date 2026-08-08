@@ -1,0 +1,51 @@
+name: Deploy to GitHub Pages
+
+# Publishes the static site to GitHub Pages. The user site rjbs.github.io
+# already carries the rjbs.cloud custom domain, so this project site is served
+# at rjbs.cloud/Winchester/ automatically -- no CNAME file belongs in this repo.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege for the deploy: read the repo, write Pages, mint the OIDC
+# token that deploy-pages exchanges with the Pages service.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deploy at a time; don't cancel a run that's mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        # enablement: true turns Pages on (source = GitHub Actions) the first
+        # time this runs, so there's no manual toggle in repo settings.
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Upload site
+        # It's plain static files with no build step, so the repo root is the
+        # site. The dev-only extras (serve.py, test/, package.json) are inert
+        # when served and simply go unused.
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
